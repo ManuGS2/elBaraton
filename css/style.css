@@ -1,6 +1,6 @@
 body{
 	font-size: 16px;
-	font-family: 'Garamond';
+	font-family: 'Bree Serif', serif;
 	background: #233D58;
 	position: relative;
 }
@@ -77,6 +77,8 @@ header #menuNav #hideBttn img{
 	left: 0px;
 	z-index: 5;
 	padding-bottom: 75px;
+	display: none;
+	border-radius: 5px;
 }
 #cardMenu #logoMenu{
 	width: 60%;
@@ -96,6 +98,88 @@ header #menuNav #hideBttn img{
 	text-decoration: none;
 	color: black;
 }
+
+#slider{
+	width: 100%;
+	height: 585px;
+	background: black;
+	margin: 0px;
+	position: relative;
+	font-family: 'Amaranth', sans-serif;
+}
+#slider section.slide{
+	position: absolute;
+	width: 100%;
+	top: 0px;
+	left: 0px;
+}
+
+/* Diseño de la pantalla de inicio*/
+#slider #home{
+	background: #233D58;
+	height: 100%;
+}
+#home h1,h2,figure{
+	position: relative;
+	text-align: center;
+	margin: 0px;
+	color: white;
+}
+#home h1,h2{
+	margin-top: 25px;
+}
+
+#home div{
+	position: relative;
+	margin: 25px;
+	text-align: center;
+}
+#home div #srchTxt{
+	position: relative;
+	margin: 0px;
+	text-align: center;
+}
+#home div div{
+	background: red;
+	margin: 0px;
+	position: relative;
+	width: 25px;
+	height: 25px;
+	background: #f1f1f1;
+	border-radius: 5px;
+	display: inline-block;
+	top: 0px;
+}
+#home div div:hover{
+	cursor: pointer;
+}
+#home div div:before{
+	margin: 0px;
+	position: relative;
+	font-family: 'icomoon';
+	content: "\e949";
+	font-size: 1.2em;
+	color: black;
+	text-align: center;
+	top: 2px;
+}
+
+
+
+#slider #products{
+	background: orange;
+	height: 400px;
+}
+#slider #location{
+	background: pink;
+	height: 300px;
+}
+#slider #kart{
+	background: yellow;
+	height: 200px;
+}
+
+
 
 /*Definimos los valores para el responsive design
  orientado a dispositivos mobiles*/
@@ -123,7 +207,7 @@ header #menuNav #hideBttn img{
 
 	}
 	header #menuNav #cardMenu{
-		display: inline-block;
+		display: block;
 		background: none;
 		top: 0px;
 		width: 100%;
@@ -132,12 +216,10 @@ header #menuNav #hideBttn img{
 		padding-bottom: 0px;
 		position: relative;
 	}
-	#cardMenu figure, #showBttn{
-		display: none;
-	}
 	#cardMenu ul{
 		margin: 0px;
 		padding: 0px;
+		margin-right: 25px;
 	}
 	#cardMenu .menuItem{
 		display: inline-block;
@@ -148,6 +230,9 @@ header #menuNav #hideBttn img{
 	}
 	.menuItem a{
 		color:white;
+	}
+	#logoMenu, #hideBttn,#showBttn{
+		display: none;
 	}
 	
 }

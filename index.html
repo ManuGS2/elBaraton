@@ -11,13 +11,13 @@
 		
         <!--Enlazamos las hojas de estilo aplicando primero el normalizador-->
         <link rel="stylesheet" type="text/css" href="css/normalize.css">
-        <link rel="stylesheet" type="text/css" href="css/icons.css">
+        <link rel="stylesheet" type="text/css" href="css/icomoon.css">
         <link rel="stylesheet" type="text/css" href="css/style.css">
+        <link href="https://fonts.googleapis.com/css?family=Amaranth|Bree+Serif|Patrick+Hand" rel="stylesheet">
         
 	</head>
-    
     <body>
-        <header>
+        <header id="header">
         	<h1 id="inicio">
         		<a id="logo" href="index.html"><figure><img src="img/almacenar.png" alt=""></figure></a>
         		<a id="title" href="index.html">El Baratón</a>
@@ -27,16 +27,82 @@
 				<div id="cardMenu">
 					<figure id="hideBttn"><img src="img/hide.png" alt=""></figure>
 					<figure id="logoMenu"><img src="img/almacenar.png" alt=""></figure>
-					<ul>
-						<li class="menuItem"><a href="index.html">Home</a></li> 
-						<li class="menuItem"><a href="index.html">Productos</a></li>
-						<li class="menuItem"><a href="index.html">Ubicaci&#243;n</a></li>
-						<li class="menuItem"><a href="index.html">Carrito</a></li>
+					<ul id="listMenu">
+						<li onclick="navSection('#home')" class="menuItem"><a href="#">Home</a></li> 
+						<li onclick="navSection('#products')" class="menuItem"><a href="#">Productos</a></li>
+						<li onclick="navSection('#location')" class="menuItem"><a href="#">Ubicaci&#243;n</a></li>
+						<li onclick="navSection('#kart')" class="menuItem"><a href="#">Carrito</a></li>
 					</ul> 
 				</div>
 			</nav>
-
 		</header>
+
+		<div id="slider">
+			<section class="slide" id="home" style="display:block">
+				<h1>El baratón</h1>
+				<figure id="tiendaImg"><img src="img/tienda-online.png" alt=""></figure>
+	    		<h2>Tu mejor opción para comprar</h2>
+	    		<div>
+	    			<input id="srchTxt" type="text" name="srchTxt" placeholder="Encuentra lo que buscas" value="" autofocus size="20">
+	    			<div id="srchBttn"></div>
+	    		</div>
+			</section>
+			<section class="slide" id="products" style="display:none">
+				<h1>EL Baratón</h1>
+				
+			</section>
+
+			<section class="slide" id="location" style="display:none">
+				
+			</section>
+			
+			<section class="slide" id="kart" style="display:none">
+				
+			</section>
+		</div>
+
+		<script type="text/javascript">
+			$(window).resize(function(){
+				if ($(window).width() >= 767 && $("#cardMenu").css("display")== "none"){
+					$("#cardMenu").show();
+				}
+			})
+			$("#showBttn").click(function(){
+				$("#cardMenu").fadeIn()
+			})
+			$("#hideBttn").click(function(){
+				$("#cardMenu").fadeOut()
+			})
+
+				
+			function navSection(slide){
+				var sections = new Array(4);
+				sections[0] = '#home';
+				sections[1] = '#products';
+				sections[2] = '#location';
+				sections[3] = '#kart';
+
+				for (var i=0; i<4; i++){
+					$(sections[i]).hide();
+				}
+				$(slide).show();
+				if (slide != "#home"){
+					$("header").css("background","#29abe2");
+					$(slide).css("background","#f1f1f1");
+
+				}else{
+					$("header").css("background","#233d58");
+					$(slide).css("background","#233d58");
+				}
+				$("#cardMenu").fadeOut();
+			}
+			
+			$("#srchBttn").click(function(){
+				alert($("#srchTxt").val())
+				$("#srchTxt").val("");
+				//navSection("#products");
+			})
+		</script>
 
     </body>
 </html>
