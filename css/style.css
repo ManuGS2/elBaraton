@@ -4,26 +4,97 @@ body{
 	background: #233D58;
 	position: relative;
 }
-
 header{
 	width: 100%;
-	height: 75px;
+	height: 50px;
 	background: #233D58;
+	margin: 0px;
+	position: relative;
+}
+header #inicio{
 	position: relative;
 	display: inline-block;
+	width: 35%;
+	height: 100%;
+	margin: 0px;
+	cursor: pointer;
+	margin-left: 70px;
+	line-height: 100%;
+	min-width: 230px;
 }
-header h1{
-	background: black;
-	width: 40%;
-	right:200px;
-}
-header nav{
-	background: blue;
-}
-header nav .menuItem{
-
-	background: yellow;
+header h1 > *{
 	display: inline-block;
+	text-decoration: none;
+	color: white;
+	font-size: 0.8em;
+	margin: 4px 4px;
+	vertical-align: middle;
+	overflow: hidden;
+}
+#logo figure{
+	height: 40px;
+	width: 40px;
+	margin: 0px;
+}
+#logo figure img{
+	height: 100%;
+	width: 100%;
+	margin: 0px;
+}
+
+header #menuNav{
+	position: relative;
+	display: inline-block;
+	vertical-align: middle;
+	width: 100%;
+	height: 50px;
+	background: none;
+	margin:0px;
+	top: -50px;
+}
+header #menuNav #showBttn,
+header #menuNav #hideBttn{
+	position: relative;
+	margin: 0px 0px 0px 15px;
+	height: 30px;
+	width: 30px;
+	cursor: pointer;
+	line-height: 40px;
+	padding-top: 10px;
+	overflow: hidden;
+}
+header #menuNav #showBttn img,
+header #menuNav #hideBttn img{
+	height: 100%;
+	width: 100%;
+}
+#menuNav #cardMenu{
+	margin: 0px;
+	position: relative;
+	width: 250px;
+	background: white;
+	top: -40px;
+	left: 0px;
+	z-index: 5;
+	padding-bottom: 75px;
+}
+#cardMenu #logoMenu{
+	width: 60%;
+	margin-left: 20%;
+	margin-top: 10px;
+}
+#cardMenu #logoMenu img{
+	width: 100%;
+	height: 100%;
+}
+#cardMenu .menuItem{
+	list-style: none;
+	font-size: 1.5em;
+	line-height: 40px;
+}
+.menuItem a{
+	text-decoration: none;
+	color: black;
 }
 
 /*Definimos los valores para el responsive design
@@ -42,4 +113,41 @@ header nav .menuItem{
 	body{
 		background: green;
 	}
+	header #menuNav{
+		position: relative;
+		display: inline-block;
+		vertical-align: middle;
+		background: none;
+		width: 100%;
+		height: 50px; 
+
+	}
+	header #menuNav #cardMenu{
+		display: inline-block;
+		background: none;
+		top: 0px;
+		width: 100%;
+		height: 100%;
+		text-align: right;
+		padding-bottom: 0px;
+		position: relative;
+	}
+	#cardMenu figure, #showBttn{
+		display: none;
+	}
+	#cardMenu ul{
+		margin: 0px;
+		padding: 0px;
+	}
+	#cardMenu .menuItem{
+		display: inline-block;
+		width: 100px;
+		text-align: center;
+		font-size: 1.2em;
+		margin: 5px 2px;
+	}
+	.menuItem a{
+		color:white;
+	}
+	
 }
