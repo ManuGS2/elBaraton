@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
-    <head> 
+	<head> 
         <meta charset="utf-8">
         <title>El Barat&#243;n</title>
 
@@ -8,12 +8,14 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
         
 		<script src="js/jquery.js"></script>
+		<script src="js/jquery-ui.min.js"></script>
 		
         <!--Enlazamos las hojas de estilo aplicando primero el normalizador-->
         <link rel="stylesheet" type="text/css" href="css/normalize.css">
         <link rel="stylesheet" type="text/css" href="css/icomoon.css">
         <link rel="stylesheet" type="text/css" href="css/style.css">
-        <link href="https://fonts.googleapis.com/css?family=Amaranth|Bree+Serif|Patrick+Hand" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="css/jquery-ui.min.css">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Amaranth|Bree+Serif|Patrick+Hand">
         
 	</head>
     <body>
@@ -43,28 +45,49 @@
 				<figure id="tiendaImg"><img src="img/tienda-online.png" alt=""></figure>
 	    		<h2>Tu mejor opción para comprar</h2>
 	    		<div>
-	    			<input id="srchTxt" type="text" name="srchTxt" placeholder="Encuentra lo que buscas" value="" autofocus size="20">
+	    			<input id="srchTxt" type="text" name="srchTxt" placeholder="Encuentra lo que buscas" value="" autofocus size="20" autocomplete="text">
 	    			<div id="srchBttn"></div>
 	    		</div>
 			</section>
 			<section class="slide" id="products" style="display:none">
-				<h1>EL Baratón</h1>
+				<h1>El  Baratón</h1>
+				<p>Elige lo que deseas</p>
+				<div id="categories"></div>
+				<!--
+				<section id='"+val.name+"' class='product "+val.sublevel_name+"'>
+					<figure class='productImg'>
+						<img src='img/tienda.png' alt=''>
+					</figure>
+					<h3>Name: "+val.name+"</h3>
+					<p>Price: "+val.price+"</p>
+					<p>Available: "+val.available+"</p>
+					<p>In stock: "+val.quantity+"</p>
+					<p>Agregar al carrito</p>
+					<div class='kartImg'></div>
+				</section>
+				-->
 				
 			</section>
 
 			<section class="slide" id="location" style="display:none">
-				
+			
 			</section>
 			
 			<section class="slide" id="kart" style="display:none">
+				<input type="button" onclick="setlocal()">
 				
 			</section>
 		</div>
 
 		<script type="text/javascript">
+			var niveles = new Array();
+			var productos = new Array();
+			
 			$(window).resize(function(){
-				if ($(window).width() >= 767 && $("#cardMenu").css("display")== "none"){
+				if ($(window).width() > 767 && $("#cardMenu").css("display")== "none"){
 					$("#cardMenu").show();
+				}else if($(window).width() <767){
+					$("#cardMenu").hide();
 				}
 			})
 			$("#showBttn").click(function(){
@@ -72,9 +95,7 @@
 			})
 			$("#hideBttn").click(function(){
 				$("#cardMenu").fadeOut()
-			})
-
-				
+			})	
 			function navSection(slide){
 				var sections = new Array(4);
 				sections[0] = '#home';
@@ -87,21 +108,90 @@
 				}
 				$(slide).show();
 				if (slide != "#home"){
-					$("header").css("background","#29abe2");
 					$(slide).css("background","#f1f1f1");
 
 				}else{
 					$("header").css("background","#233d58");
 					$(slide).css("background","#233d58");
 				}
-				$("#cardMenu").fadeOut();
+				if(slide == "#products"){
+					$("#categories").accordion({heightStyle:"content",collapsible:true,active:true});
+				}
+				if ($(window).width() < 767){
+					$("#cardMenu").fadeOut();
+				}
 			}
-			
 			$("#srchBttn").click(function(){
+				navSection("#products");
 				alert($("#srchTxt").val())
-				$("#srchTxt").val("");
-				//navSection("#products");
+				$("#srchTxt").val("");	
 			})
+			$.getJSON("/json/products.json", function(data){
+				$.each(data.products, function(key, val){
+					productos.push({lvl:val.sublevel_name,prod:"<section id='"+val.name+"' class='product "+val.sublevel_name+"' onclick=showProduct('#"+val.name+"') ><figure class='productImg'><img src='img/tienda.png' alt=''></figure><h3>Name: "+val.name+"</h3><p>Price: "+val.price+"</p><p>Available: "+val.available+"</p><p>In stock: "+val.quantity+"</p><p>Add to kart</p><div class='kartImg' onclick=addKart('#"+val.name+"')></div></section>"})
+				});
+			});
+			$.getJSON("/json/categories.json", function(data){
+				var categorie = [];
+				var inicio = 0;
+				var categorieSublevels;
+				var productosAux = productos;
+
+				$.each(data.categories,function(key,val){
+					addSublevel(val.sublevels,val.name);
+					var categorieSublevels = new Array();
+ 
+					productosAux.forEach(function(item,id){						
+						if (findCategorie(item.lvl,niveles.slice(inicio)) == 1){
+							categorieSublevels.push(item.prod)
+							productos.splice(id,1)
+						}				
+					});
+					productosAux = productos
+					$("#categories").append("<h2 id ='"+val.name+"' class='categorie'>"+val.name+"</h2><div>"+categorieSublevels.join("")+"</div>");
+					/*categorie.push("<h2 id ='"+val.name+"' class='categorie'>"+val.name+"</h2><div>"+categorieSublevels.join("")+"</div>");*/
+					inicio = niveles.length;
+				});
+				//$("#categories").append(categorie.join(""));
+			});
+
+			// Funcion recursiva para agregar todos los subniveles disponibles en una categoria
+			function addSublevel(sublvls, categoria){
+				if(sublvls != undefined){
+					$.each(sublvls,function(id,value){
+						addSublevel(value.sublevels,categoria)
+						niveles.push({name:value.name,id:value.id,categorie:categoria})
+					})
+				}
+				return 0;
+			}
+
+			/*Funcion para hayar la categoria de una producto
+			  Devuelve 1 si la encuentra y 0 si no.
+			*/
+			function findCategorie(productlvl, sublevels){
+				var retorno = false;
+				$.each(sublevels, function(id,item){
+					if(item.name == productlvl){
+						retorno = true;
+					}
+				});
+				return retorno;
+			}
+			function showProduct(data){
+				$(data).animate({width:"20%",'font-size':'1.2em'}, 1500);
+  			}
+
+  			/*
+			
+  			function addKart(data){
+  				localStorage.setItem("item",data);
+  			}
+  			function setlocal(){
+  				console.log(localStorage.getItem("lastname"))
+  			}
+  			Poner la animacion solo en la imagne hacer el diseño mobile first, agrgar al carrito. ajustar todo a su tamaño y componer el acordeón
+  			*/
 		</script>
 
     </body>
