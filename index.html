@@ -46,7 +46,7 @@
 	    		<h2>Tu mejor opción para comprar</h2>
 	    		<div>
 	    			<input id="srchTxt" type="text" name="srchTxt" placeholder="Encuentra lo que buscas" value="" autofocus size="20" autocomplete="text">
-	    			<div id="srchBttn"></div>
+	    			<input id="srchBttn" type="button" name="srchBttn" value="Buscar">
 	    		</div>
 			</section>
 			<section class="slide" id="products" style="display:none">
@@ -74,21 +74,23 @@
 			</section>
 			
 			<section class="slide" id="kart" style="display:none">
-				<input type="button" onclick="setlocal()">
+				
 				
 			</section>
 		</div>
 
 		<script type="text/javascript">
-			var niveles = new Array();
+			var subniveles = new Array();
 			var productos = new Array();
-			
+			var labels = new Array();
+
 			$(window).resize(function(){
 				if ($(window).width() > 767 && $("#cardMenu").css("display")== "none"){
 					$("#cardMenu").show();
 				}else if($(window).width() <767){
 					$("#cardMenu").hide();
 				}
+
 			})
 			$("#showBttn").click(function(){
 				$("#cardMenu").fadeIn()
@@ -115,82 +117,93 @@
 					$(slide).css("background","#233d58");
 				}
 				if(slide == "#products"){
-					$("#categories").accordion({heightStyle:"content",collapsible:true,active:true});
+					$("#categories").accordion({heightStyle:"content",collapsible:true,active:true,animate:800});
 				}
 				if ($(window).width() < 767){
 					$("#cardMenu").fadeOut();
 				}
 			}
-			$("#srchBttn").click(function(){
-				navSection("#products");
-				alert($("#srchTxt").val())
-				$("#srchTxt").val("");	
-			})
 			$.getJSON("/json/products.json", function(data){
 				$.each(data.products, function(key, val){
-					productos.push({lvl:val.sublevel_name,prod:"<section id='"+val.name+"' class='product "+val.sublevel_name+"' onclick=showProduct('#"+val.name+"') ><figure class='productImg'><img src='img/tienda.png' alt=''></figure><h3>Name: "+val.name+"</h3><p>Price: "+val.price+"</p><p>Available: "+val.available+"</p><p>In stock: "+val.quantity+"</p><p>Add to kart</p><div class='kartImg' onclick=addKart('#"+val.name+"')></div></section>"})
+					productos.push({value:val.id,label:val.name,lvl:val.sublevel_id,prod:"<section id='"+val.id+"' class='product "+val.sublevel_id+"'><figure class='productImg'><img src='img/tienda.png' alt=''></figure><h3>Name: "+val.name+"</h3><p>Price: "+val.price+"</p><p>Available: "+val.available+"</p><p>In stock: "+val.quantity+"</p><p>Add to kart</p><div class='kartImg' onclick=addKart('"+val.name+"')></div></section>"})
+					labels.push(val.id)
 				});
+				
 			});
 			$.getJSON("/json/categories.json", function(data){
-				var categorie = [];
-				var inicio = 0;
-				var categorieSublevels;
-				var productosAux = productos;
-
+				/*Agregamos los subniveles de cada categoria a la variable global niveles
+				  Y agregamos su correspodiente section al DOM
+				*/
 				$.each(data.categories,function(key,val){
-					addSublevel(val.sublevels,val.name);
-					var categorieSublevels = new Array();
- 
-					productosAux.forEach(function(item,id){						
-						if (findCategorie(item.lvl,niveles.slice(inicio)) == 1){
-							categorieSublevels.push(item.prod)
-							productos.splice(id,1)
-						}				
-					});
-					productosAux = productos
-					$("#categories").append("<h2 id ='"+val.name+"' class='categorie'>"+val.name+"</h2><div>"+categorieSublevels.join("")+"</div>");
-					/*categorie.push("<h2 id ='"+val.name+"' class='categorie'>"+val.name+"</h2><div>"+categorieSublevels.join("")+"</div>");*/
-					inicio = niveles.length;
+					addSublevel(val.sublevels,val.name,key);
+					$("#categories").append("<h2 class='categorie'>"+val.name+"</h2><div id ='"+val.name+"'></div>");
 				});
-				//$("#categories").append(categorie.join(""));
+				//Agregamos cada producto a su categoria correspondiente
+				productos.forEach(function(item,id){
+					$(findCategorie(item.lvl,true)).append(item.prod)		
+				});
 			});
 
+			/* Funcion que busca un producto ingresado por el usuario y despliega
+			   el panel al que pertenece. Por medio de una animacion indica el elemento buscado.
+			*/
+			$("#srchBttn").click(function(){
+				var producto = $("#srchTxt").val();
+				$("#srchTxt").val("");
+				navSection("#products");
+				if(labels.includes(producto)){
+					productos.forEach(function(item, id){
+						if(item.value == producto){
+							console.log("success")
+							$("#categories").accordion("option","active",findCategorie(item.lvl,false));
+							$("#"+item.value).show()
+							$("#"+item.value).effect("bounce","slow")
+							return true
+						}
+					});
+
+				}else{
+					alert("No se encontraron coincidencias")
+					$("#categories").accordion("option", "active", 0 );
+				}
+					
+			})
+			$("#srchTxt").autocomplete({source:productos, autoFocus:true});
 			// Funcion recursiva para agregar todos los subniveles disponibles en una categoria
-			function addSublevel(sublvls, categoria){
+			function addSublevel(sublvls, categoria,pos){
 				if(sublvls != undefined){
 					$.each(sublvls,function(id,value){
-						addSublevel(value.sublevels,categoria)
-						niveles.push({name:value.name,id:value.id,categorie:categoria})
+						addSublevel(value.sublevels,categoria,pos)
+						subniveles.push({name:value.name,id:value.id,categorie:categoria,categorieId:pos})
 					})
 				}
 				return 0;
 			}
-
-			/*Funcion para hayar la categoria de una producto
-			  Devuelve 1 si la encuentra y 0 si no.
+			/*Funciona que busca la categoria a la que pertenece un subnivel
+			  La devuelve concatenada con '#' para poder usarla como selector
+			  O su posicion para poder desplagarla en el menu tipo acordeon
 			*/
-			function findCategorie(productlvl, sublevels){
-				var retorno = false;
-				$.each(sublevels, function(id,item){
-					if(item.name == productlvl){
-						retorno = true;
+			function findCategorie(productlvl,op){
+				var categorie;
+				var categorieId;
+				$.each(subniveles, function(id,item){
+					if(item.id == productlvl){
+						categorie = item.categorie;
+						categorieId = item.categorieId;
+						return 0;
 					}
 				});
-				return retorno;
+				if (op){return "#"+categorie;}
+				else {return categorieId;}		
 			}
-			function showProduct(data){
-				$(data).animate({width:"20%",'font-size':'1.2em'}, 1500);
-  			}
 
-  			/*
-			
   			function addKart(data){
-  				localStorage.setItem("item",data);
+  				
+  				console.log(data);
   			}
-  			function setlocal(){
-  				console.log(localStorage.getItem("lastname"))
-  			}
-  			Poner la animacion solo en la imagne hacer el diseño mobile first, agrgar al carrito. ajustar todo a su tamaño y componer el acordeón
+  			/*
+  			Poner la animacion solo en la imagne hacer el diseño mobile first, agrgar al carrito. ajustar todo a su tamaño y componer el acordeón agregar el ordenamiento y todo eso, filtrado y así
+  			
   			*/
 		</script>
 

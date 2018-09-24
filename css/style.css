@@ -100,11 +100,12 @@ header #menuNav #hideBttn img{
 }
 
 #slider{
-	width: 100%;
-	height: 585px;
-	background: black;
-	margin: 0px;
 	position: relative;
+	display: block;
+	width: 100%;
+	height: 580px;
+	margin: 0px;
+	padding: 0px;
 	font-family: 'Amaranth', sans-serif;
 }
 #slider section.slide{
@@ -138,31 +139,10 @@ header #menuNav #hideBttn img{
 #home div #srchTxt{
 	position: relative;
 	margin: 0px;
-	text-align: center;
+	text-align: left;
 }
-#home div div{
-	background: red;
-	margin: 0px;
-	position: relative;
-	width: 25px;
-	height: 25px;
-	background: #f1f1f1;
-	border-radius: 5px;
-	display: inline-block;
-	top: 0px;
-}
-#home div div:hover{
+#home div #srchBttn:hover{
 	cursor: pointer;
-}
-#home div div:before{
-	margin: 0px;
-	position: relative;
-	font-family: 'icomoon';
-	content: "\e949";
-	font-size: 1.2em;
-	color: black;
-	text-align: center;
-	top: 2px;
 }
 
 /*Diseño de la pantalla de productos*/
@@ -170,7 +150,15 @@ header #menuNav #hideBttn img{
 	background: #f1f1f1;
 	width: 100%;
 }
+#categories .ui-accordion-header{
+	margin: 0px;
+	text-align: left;
+}
+#categories .ui-accordion-header-active{
+	background: #b8a7f3;
+	margin:0px;
 
+}
 #categories .ui-accordion-content{
 	margin: 0px;
 	padding: 0px;
@@ -249,6 +237,7 @@ header #menuNav #hideBttn img{
 #categories .kartImg:hover{
 	border-style: double;
 }
+
 
 /*
 #slider #location{
