@@ -156,7 +156,7 @@
 						if(item.value == producto){
 							console.log("success")
 							$("#categories").accordion("option","active",findCategorie(item.lvl,false));
-							$("#"+item.value).show()
+							$("html, body").animate({"scrollTop": $("#"+item.value).position().top},250);	
 							$("#"+item.value).effect("bounce","slow")
 							return true
 						}

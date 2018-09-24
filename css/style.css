@@ -253,7 +253,7 @@ header #menuNav #hideBttn img{
 
 /*Definimos los valores para el responsive design
  orientado a dispositivos mobiles*/
-@media screen and (min-width: 480px){
+/*@media screen and (min-width: 480px){
 	body{
 		background: red;
 	}
@@ -262,10 +262,10 @@ header #menuNav #hideBttn img{
 	body{
 		background: orange ;
 	}
-}
+}*/
 @media screen and (min-width: 767px){
 	body{
-		background: green;
+		background: none;
 	}
 	header #menuNav{
 		position: relative;
