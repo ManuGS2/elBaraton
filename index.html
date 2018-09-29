@@ -25,15 +25,18 @@
         		<a id="title" href="index.html">El Baratón</a>
         	</h1>     	
 			<nav id="menuNav">
-				<figure id="showBttn"><img src="img/menu.png" alt=""></figure>
+				<figure id="showBttn">
+					<img src="img/menu.png" alt="">
+				</figure>
+				<div id="notificationKart" onclick="hideNotification()" style="display:none">0</div>
 				<div id="cardMenu">
 					<figure id="hideBttn"><img src="img/hide.png" alt=""></figure>
 					<figure id="logoMenu"><img src="img/almacenar.png" alt=""></figure>
 					<ul id="listMenu">
-						<li onclick="navSection('#home')" class="menuItem"><a href="#">Home</a></li> 
+						<li class="menuItem"><a href="index.html">Home</a></li> 
 						<li onclick="navSection('#products')" class="menuItem"><a href="#">Productos</a></li>
 						<li onclick="navSection('#location')" class="menuItem"><a href="#">Ubicaci&#243;n</a></li>
-						<li onclick="navSection('#kart')" class="menuItem"><a href="#">Carrito</a></li>
+						<li onclick="navSection('#kart')" class="menuItem"><a href="#">Carrito</a><p id="notificationMenuNav" style="display:none">0</p></li>
 					</ul> 
 				</div>
 			</nav>
@@ -49,33 +52,44 @@
 	    			<input id="srchBttn" type="button" name="srchBttn" value="Buscar">
 	    		</div>
 			</section>
+
 			<section class="slide" id="products" style="display:none">
 				<h1>El  Baratón</h1>
 				<p>Elige lo que deseas</p>
-				<div id="categories"></div>
-				<!--
-				<section id='"+val.name+"' class='product "+val.sublevel_name+"'>
-					<figure class='productImg'>
-						<img src='img/tienda.png' alt=''>
-					</figure>
-					<h3>Name: "+val.name+"</h3>
-					<p>Price: "+val.price+"</p>
-					<p>Available: "+val.available+"</p>
-					<p>In stock: "+val.quantity+"</p>
-					<p>Agregar al carrito</p>
-					<div class='kartImg'></div>
-				</section>
-				-->
-				
+				<div id="categories"></div>				
 			</section>
 
 			<section class="slide" id="location" style="display:none">
-			
 			</section>
 			
 			<section class="slide" id="kart" style="display:none">
-				
-				
+				<h3> Productos agregados a tu carrito </h3>
+				<div id="productsMenu">
+					<p id="lblProd">Producto</p>
+					<p>Precio</p>
+					<p>Cantidad</p>
+					<p>Subtotal</p>
+				</div>
+				<div id="carrito">
+					<!--
+						<section class='kartProduct' id='k"+infoProduct[0]+"'>
+							<figure class='kartImg'><img src='img/tienda.png' alt=''></figure>
+							<div>
+								<p class='name'><label class='etiqueta' for='name'>Nombre:&thinsp;</label>"+infoProduct[1]+"</p>
+
+								<p class='price' id='p"+infoProduct[0]+"'><label class='etiqueta' for='price'>Precio:&thinsp;</label>"+[infoProduct[3],infoProduct[4]].join(",")+"</p>
+
+								<p><label class='etiqueta' for='numberItems'>Cantidad: </label>
+								<input class='numberItems' type='text' name='"+infoProduct[0]+"' value='1'>
+								</p>
+
+								<p class='subtotal' id='su"+infoProduct[0]+"'><label class='etiqueta' for='subtotal'>Subtotal:&thinsp;</label>"+[infoProduct[3],infoProduct[4]].join("")+"</p>
+
+								<input onclick=deleteItem('"+infoProduct[0]+"') type='button' value='Eliminar'>
+							</div>
+						</section>
+					-->
+				</div>
 			</section>
 		</div>
 
@@ -90,14 +104,20 @@
 				}else if($(window).width() <767){
 					$("#cardMenu").hide();
 				}
+			});
 
-			})
 			$("#showBttn").click(function(){
 				$("#cardMenu").fadeIn()
-			})
-			$("#hideBttn").click(function(){
-				$("#cardMenu").fadeOut()
-			})	
+				if ($("#notificationKart").css("display") != "none"){
+					$("#notificationKart").click();	
+				}	
+			});
+
+			$("#hideBttn").click(function(){$("#cardMenu").fadeOut()});	
+
+			/*	Fucion para nevegar en las distintas secciones de la página.
+				Debido a que todo se hizo en un mismo archivo, ocultamos y mostramos las secciones de acuerdo a la que se elija
+			*/
 			function navSection(slide){
 				var sections = new Array(4);
 				sections[0] = '#home';
@@ -109,27 +129,23 @@
 					$(sections[i]).hide();
 				}
 				$(slide).show();
-				if (slide != "#home"){
-					$(slide).css("background","#f1f1f1");
-
-				}else{
-					$("header").css("background","#233d58");
-					$(slide).css("background","#233d58");
-				}
 				if(slide == "#products"){
-					$("#categories").accordion({heightStyle:"content",collapsible:true,active:true,animate:800});
+					$("#categories").accordion({heightStyle:"content",collapsible:true,active:true,animate:800,icons:{"header":"ui-icon-circle-plus", "activeHeader":"	ui-icon-circle-minus"}});
 				}
-				if ($(window).width() < 767){
-					$("#cardMenu").fadeOut();
+				else if(slide == "#kart"){
+					showKart()
+					$("body").css("background","#f1f1f1")
 				}
+				if ($(window).width() < 767){$("#cardMenu").fadeOut();}
 			}
+
 			$.getJSON("/json/products.json", function(data){
 				$.each(data.products, function(key, val){
-					productos.push({value:val.id,label:val.name,lvl:val.sublevel_id,prod:"<section id='"+val.id+"' class='product "+val.sublevel_id+"'><figure class='productImg'><img src='img/tienda.png' alt=''></figure><h3>Name: "+val.name+"</h3><p>Price: "+val.price+"</p><p>Available: "+val.available+"</p><p>In stock: "+val.quantity+"</p><p>Add to kart</p><div class='kartImg' onclick=addKart('"+val.name+"')></div></section>"})
+					productos.push({value:val.id,label:val.name,lvl:val.sublevel_id,prod:"<section id='"+val.id+"' class='product "+val.sublevel_id+"'><figure class='productImg'><img src='img/tienda.png' alt=''></figure><h3>Name: "+val.name+"</h3><p>Price: "+val.price+"</p><p>Available: "+val.available+"</p><p>In stock: "+val.quantity+"</p><p>Add to kart</p><div class='kartImg' onclick=addToKart(['"+val.id+"','"+val.name+"','"+val.quantity+"','"+val.price+"'])></div></section>"})
 					labels.push(val.id)
 				});
-				
 			});
+
 			$.getJSON("/json/categories.json", function(data){
 				/*Agregamos los subniveles de cada categoria a la variable global niveles
 				  Y agregamos su correspodiente section al DOM
@@ -140,12 +156,11 @@
 				});
 				//Agregamos cada producto a su categoria correspondiente
 				productos.forEach(function(item,id){
-					$(findCategorie(item.lvl,true)).append(item.prod)		
+					$(findCategorie(item.lvl,true)).append(item.prod)
 				});
 			});
 
-			/* Funcion que busca un producto ingresado por el usuario y despliega
-			   el panel al que pertenece. Por medio de una animacion indica el elemento buscado.
+			/* Funcion que busca un producto ingresado por el usuario y despliega el panel al que pertenece. Por medio de una animacion indica el elemento buscado.
 			*/
 			$("#srchBttn").click(function(){
 				var producto = $("#srchTxt").val();
@@ -156,19 +171,20 @@
 						if(item.value == producto){
 							console.log("success")
 							$("#categories").accordion("option","active",findCategorie(item.lvl,false));
-							$("html, body").animate({"scrollTop": $("#"+item.value).position().top},250);	
+							$("html, body").animate({"scrollTop": $("#"+item.value).position().top+200},250);	
 							$("#"+item.value).effect("bounce","slow")
 							return true
 						}
 					});
-
-				}else{
+				}
+				else{
 					alert("No se encontraron coincidencias")
 					$("#categories").accordion("option", "active", 0 );
-				}
-					
-			})
+				}		
+			});
+
 			$("#srchTxt").autocomplete({source:productos, autoFocus:true});
+			
 			// Funcion recursiva para agregar todos los subniveles disponibles en una categoria
 			function addSublevel(sublvls, categoria,pos){
 				if(sublvls != undefined){
@@ -179,9 +195,10 @@
 				}
 				return 0;
 			}
-			/*Funciona que busca la categoria a la que pertenece un subnivel
+
+			/* Funcion que busca la categoria a la que pertenece un subnivel
 			  La devuelve concatenada con '#' para poder usarla como selector
-			  O su posicion para poder desplagarla en el menu tipo acordeon
+			  O su posicion para poder desplegarla en el menu tipo acordeon
 			*/
 			function findCategorie(productlvl,op){
 				var categorie;
@@ -197,13 +214,83 @@
 				else {return categorieId;}		
 			}
 
-  			function addKart(data){
-  				
-  				console.log(data);
+			/*
+				Funcion que agrega al carrito un producto.
+				Verifica si el navegador soporta el almacenamiento local.
+				Si no se ha agregado el producto al carrito y si está disponible entonces lo agrega, sino manda mensajes de error.
+			*/
+  			function addToKart(data){
+				if (typeof(Storage) !== "undefined") {
+					if (localStorage.getItem(data[0]) == null){
+						if (data[1] != "No"){
+			  				var numNotification = parseInt($("#notificationKart").html())+1;
+							$("#notificationKart").html(numNotification);
+			  				if (window.matchMedia("(max-width: 767px)").matches){$("#notificationKart").css("display","block")}
+			  				$("#notificationMenuNav").css("display","inline-block")
+	  						$("#notificationMenuNav").html($("#notificationKart").html());
+			  				localStorage.setItem(data[0],data);
+			  				alert("Producto agrado al carrito")
+
+		  				}else {alert("Producto no disponible")}
+	  				}else {alert("El producto ya está en el carrito")}
+				} else {alert("No se soporta el almacenamiento local")}
+  			}
+
+  			function hideNotification(){
+  				$("#notificationKart").html("0");
+  				$("#notificationKart").css("display","none");
+  				$("#showBttn").click();
+  			}
+
+  			/*
+  				Funcion que lee los elementos agregados al carrito del almacenamiento local
+  				y los muestra en la ventana con la informacion necesaria.
+  			*/
+  			function showKart(){
+  				$("#carrito").children().remove();
+  				$("#notificationMenuNav").html("0");
+  				$("#notificationMenuNav").css("display","none");
+  				$("#home").css("background","#f1f1f1")
+  				var infoProduct;
+  				Object.keys(localStorage).forEach(function(val, idx){
+  					$("#carrito").append("")
+  					infoProduct = localStorage.getItem(val).split(",")
+  					$("#carrito").append("<section class='kartProduct' id='k"+infoProduct[0]+"'><figure class='kartImg'><img src='img/tienda.png' alt=''></figure><div><p class='name'><label class='etiqueta' for='name'>Nombre:&thinsp;</label>"+infoProduct[1]+"</p><p class='price' id='p"+infoProduct[0]+"'><label class='etiqueta' for='price'>Precio:&thinsp;</label>"+[infoProduct[3],infoProduct[4]].join(",")+"</p><p><label class='etiqueta' for='numberItems'>Cantidad: </label><input class='numberItems' type='text' name='"+infoProduct[0]+"' value='1'></p><p class='subtotal' id='su"+infoProduct[0]+"'><label class='etiqueta' for='subtotal'>Subtotal:&thinsp;</label>"+[infoProduct[3],infoProduct[4]].join("")+"</p><input class='deleteItem'onclick=deleteItem('"+infoProduct[0]+"') type='button' value='Eliminar'></div></section>");
+  				});
+  				if(Object.keys(localStorage).length != 0){
+  					var total=0;
+  					$.each($("p.subtotal"), function(key,val){
+  						total += parseInt($(this).html().slice(58))
+  					})
+  					$("#carrito").append("<section id='totalToPay' onclick=payProducts()><p>Total a pagar: </p><p id='amount'>$"+total+"</p></section>")
+  				}
+  				$(".numberItems").spinner({icons: {up: "ui-icon-circle-triangle-n",down:"ui-icon-circle-triangle-s"},min:0,max:10, "value":"1"});
+  				$(".numberItems").on("spin", function(event, ui){
+  					var id = event.target.attributes.name.value
+  					var precio = parseInt($("#p"+id).html().slice(53).split(",").join(""))
+  					var subtotal = $("#su"+id).html().slice(0,58)+precio*ui.value
+  					var total=0;
+
+  					$("#su"+id).html(subtotal)
+  					console.log(subtotal)
+
+  					$.each($("p.subtotal"), function(key,val){
+  						total += parseInt($(this).html().slice(58))
+  					})
+  					$("#amount").html("$"+total);
+  				});
+  			}
+
+  			function payProducts(){
+  				alert("Pagar productos")
+  			}
+
+  			function deleteItem(idItem){
+  				$("#k"+idItem).toggle("blind")
+  				localStorage.removeItem(idItem)
   			}
   			/*
-  			Poner la animacion solo en la imagne hacer el diseño mobile first, agrgar al carrito. ajustar todo a su tamaño y componer el acordeón agregar el ordenamiento y todo eso, filtrado y así
-  			
+  			 agregar el ordenamiento y todo eso, filtrado y así
   			*/
 		</script>
 
