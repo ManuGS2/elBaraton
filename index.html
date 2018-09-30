@@ -3,9 +3,6 @@
 	<head> 
         <meta charset="utf-8">
         <title>El Barat&#243;n</title>
-
-        <!--Evitamos que el usuario puede hacer zoom sobre la página para móviles-->
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
         
 		<script src="js/jquery.js"></script>
 		<script src="js/jquery-ui.min.js"></script>
@@ -63,6 +60,7 @@
 						<option value="available">Disponibilidad</option>
 						<option value="price">Precio</option>
 						<option value="quantity">Cantidad</option>
+						<option value="sublevel">Subnivel</option>
 					</select>
 
 					<p class="sliderPrice" style="display: none;">
@@ -76,12 +74,14 @@
 						<input class="sliderQuantity" type="text" id="cantidad" readonly style="display: none;">
 					</p>
  					<div id="quantitySlide" class="sliderQuantity" style="display: none;"></div>
+
+ 					<ul id="levelMenu" style="display: none;"></ul>
 				</fieldset>
 
 				<fieldset>
 					<label for="sort">Ordenar por:</label>
 					<select name="sort" id="sort">
-						<option value="available">Disponibilidad</option>
+						<option value="available" selected="selected">Disponibilidad</option>
 						<option value="price">Precio</option>
 						<option value="quantity">Cantidad</option>
 					</select>
@@ -124,10 +124,10 @@
 
 			$("#hideBttn").click(function(){$("#cardMenu").fadeOut()});	
 
-			/*	Fucion para nevegar en las distintas secciones de la página.
-				Debido a que todo se hizo en un mismo archivo, ocultamos y mostramos las secciones de acuerdo a la que se elija
-			*/
 			function navSection(slide){
+				/*	Fucion para nevegar en las distintas secciones de la página.
+					Debido a que todo se hizo en un mismo archivo, ocultamos y mostramos las secciones de acuerdo a la que se elija
+				*/
 				var sections = new Array(3);
 				sections[0] = '#home';
 				sections[1] = '#products';
@@ -139,11 +139,13 @@
 				$(slide).show();
 				if(slide == "#products"){
 					$("#categories").accordion({heightStyle:"content",collapsible:true,active:0,animate:500,icons:{"header":"ui-icon-circle-plus", "activeHeader":"ui-icon-circle-minus"}});
+					//$("#home").css("background","#f1f1f1")
+					$("body").css("background","#f1f1f1")
 				}
 				else if(slide == "#kart"){
 					$("#notificationMenuNav").html("0");
 	  				$("#notificationMenuNav").css("display","none");
-	  				$("#home").css("background","#f1f1f1")
+	  				//$("#home").css("background","#f1f1f1")
 					showKart()
 					$("body").css("background","#f1f1f1")
 				}
@@ -162,7 +164,12 @@
 				  Y agregamos su correspodiente section al DOM
 				*/
 				$.each(data.categories,function(key,val){
-					addSublevel(val.sublevels,val.name,key);
+					var subniveles = new Array()
+					subniveles.push("<li value='categorie'><div>"+val.name+"</div>")	
+					subniveles.push(addSublevel(val.sublevels,val.name,key));
+					subniveles.push("</li>")
+					$("#levelMenu").append(subniveles.join(""));
+
 					$("#categories").append("<h2 class='categorie'>"+val.name+"</h2><div id ='"+val.name+"'></div>");
 				});
 				//Agregamos cada producto a su categoria correspondiente
@@ -171,18 +178,20 @@
 				});
 			});
 
-			/* Funcion que busca un producto ingresado por el usuario y despliega el panel al que pertenece. Por medio de una animacion indica el elemento buscado.
-			*/
+			
 			$("#srchBttn").click(function(){
+				/*	
+					Funcion que busca un producto ingresado por el usuario y despliega el panel
+					al que pertenece. Por medio de una animacion indica el elemento buscado.
+				*/
 				var producto = $("#srchTxt").val();
 				$("#srchTxt").val("");
 				navSection("#products");
 				if(labels.includes(producto)){
 					productos.forEach(function(item, id){
 						if(item.value == producto){
-							console.log("success")
 							$("#categories").accordion("option","active",findCategorie(item.lvl,false));
-							$(findCategorie(item.lvl,true)).animate({"scrollTop":$("#"+item.value).position().top-200},400, function(){
+							$("html, body").animate({"scrollTop":$("#"+item.value).position().top-200},400, function(){
 									$("#"+item.value).effect("bounce","slow");
 							});	
 							return true
@@ -197,22 +206,27 @@
 
 			$("#srchTxt").autocomplete({source:productos, autoFocus:true});
 			
-			// Funcion recursiva para agregar todos los subniveles disponibles en una categoria
 			function addSublevel(sublvls, categoria,pos){
+				// Funcion recursiva para agregar todos los subniveles disponibles en una categoria
+				var elementos = new Array();
 				if(sublvls != undefined){
+					elementos.push("<ul>")
 					$.each(sublvls,function(id,value){
-						addSublevel(value.sublevels,categoria,pos)
+						elementos.push("<li value='"+value.id+"'><div>"+value.name+"</div>")
+						elementos.push(addSublevel(value.sublevels,categoria,pos))
+						elementos.push("</li>")
 						subniveles.push({name:value.name,id:value.id,categorie:categoria,categorieId:pos})
 					})
+					elementos.push("</ul>")
 				}
-				return 0;
+				return elementos.join("");
 			}
 
-			/* Funcion que busca la categoria a la que pertenece un subnivel
-			  La devuelve concatenada con '#' para poder usarla como selector
-			  O su posicion para poder desplegarla en el menu tipo acordeon
-			*/
 			function findCategorie(productlvl,op){
+				/*	Funcion que busca la categoria a la que pertenece un subnivel
+					La devuelve concatenada con '#' para poder usarla como selector
+					O su posicion para poder desplegarla en el menu tipo acordeon
+				*/
 				var categorie;
 				var categorieId;
 				$.each(subniveles, function(id,item){
@@ -226,12 +240,12 @@
 				else {return categorieId;}		
 			}
 
-			/*
-				Funcion que agrega al carrito un producto.
-				Verifica si el navegador soporta el almacenamiento local.
-				Si no se ha agregado el producto al carrito y si está disponible entonces lo agrega, sino manda mensajes de error.
-			*/
   			function addToKart(data){
+  				/*
+					Funcion que agrega al carrito un producto.
+					Verifica si el navegador soporta el almacenamiento local.
+					Si no se ha agregado el producto al carrito y si está disponible entonces lo agrega, sino manda mensajes de error.
+				*/
 				if (typeof(Storage) !== "undefined") {
 					if (localStorage.getItem(data[0]) == null){
 						if (data[4] != "No"){
@@ -254,11 +268,11 @@
   				$("#showBttn").click();
   			}
 
-  			/*
-  				Funcion que lee los elementos agregados al carrito del almacenamiento local
-  				y los muestra en la ventana con la informacion necesaria.
-  			*/
   			function showKart(){
+  				/*
+	  				Funcion que lee los elementos agregados al carrito del almacenamiento local
+	  				y los muestra en la ventana con la informacion necesaria.
+	  			*/
   				$("#carrito").children().remove();
   				var infoProduct;
   				Object.keys(localStorage).forEach(function(val, idx){
@@ -346,33 +360,60 @@
 				$("#cantidad").val($("#quantitySlide").slider("value"));
   			}
 
-  			$("#filter").selectmenu({select:function(event,ui){
-  				switch(ui.item.value){
+  			function filterBySublevel(){
+  				$("#levelMenu").show()
+  				$("#levelMenu").menu({select:function(event,ui){
+  					var subnivel = ui.item[0].attributes[0].value;
+  					if(subnivel == "categorie"){
+  						alert("Elige un subnivel")
+  					}
+  					else{
+  						$(".product").hide()
+  						$("."+subnivel).show()
+  						$("#categories").accordion("option","active",findCategorie(subnivel,false));
+  					}
+  				}})
+  			}
 
-  					case "noFilter":
-  						$(".product").show()
-  						$(".sliderPrice").hide();
-  						$(".sliderQuantity").hide();
-  						break;
+  			$("#filter").selectmenu({classes:{"ui-selectmenu-menu": "highlight"},
+  				select:function(event,ui){
+	  				switch(ui.item.value){
 
-  					case "price":
-  						$(".sliderQuantity").hide();
-  						filterByPrice()
-  						break;
+	  					case "noFilter":
+	  						$(".product").show()
+	  						$(".sliderPrice").hide();
+	  						$(".sliderQuantity").hide();
+	  						$("#levelMenu").hide();
+	  						break;
 
-  					case "quantity":
-  						$(".sliderPrice").hide();
-  						filterByQuantity()
+	  					case "price":
+	  						$(".sliderQuantity").hide();
+	  						$("#levelMenu").hide();
+	  						filterByPrice()
+	  						break;
 
-  						break;
+	  					case "quantity":
+	  						$(".sliderPrice").hide();
+	  						$("#levelMenu").hide();
+	  						filterByQuantity()
 
-  					case "available":
-  						$(".sliderPrice").hide();
-  						$(".sliderQuantity").hide();
-  						$(".No").hide();
-  						break;
+	  						break;
+
+	  					case "available":
+	  						$(".sliderPrice").hide();
+	  						$(".sliderQuantity").hide();
+	  						$("#levelMenu").hide();
+	  						$(".product").show();
+	  						$(".No").hide();
+	  						break;
+	  					case "sublevel":
+	  						$(".sliderPrice").hide();
+	  						$(".sliderQuantity").hide();
+	  						filterBySublevel()
+	  						break
+	  				}
   				}
-  			}});
+  			});
 
   			function sortByQuantity(){
   				$(".product").hide();
@@ -430,22 +471,24 @@
 				});
   			}
 
-  			$("#sort").selectmenu({select:function(event,ui){
-  				switch(ui.item.value){
+  			$("#sort").selectmenu({classes:{"ui-selectmenu-menu": "highlight"},
+  				select:function(event,ui){
+	  				switch(ui.item.value){
 
-  					case "price":
-  						sortByPrice()
-  						break;
+	  					case "price":
+	  						sortByPrice()
+	  						break;
 
-  					case "quantity":
-  						sortByQuantity()
-  						break;
+	  					case "quantity":
+	  						sortByQuantity()
+	  						break;
 
-  					case "available":
-  						sortByAvailability()
-  						break;
+	  					case "available":
+	  						sortByAvailability()
+	  						break;
+	  				}
   				}
-  			}});
+  			});
   			
 		</script>
 

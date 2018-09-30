@@ -135,7 +135,6 @@ header #menuNav #notificationKart:hover{
 	position: relative;
 	display: block;
 	width: 100%;
-	height: 580px;
 	margin: 0px;
 	padding: 0px;
 	font-family: 'Amaranth', sans-serif;
@@ -152,6 +151,7 @@ header #menuNav #notificationKart:hover{
 #slider #home{
 	background: #233D58;
 	height: 100%;
+	width: 100%
 }
 #home h1,h2,figure{
 	position: relative;
@@ -181,6 +181,7 @@ header #menuNav #notificationKart:hover{
 #slider #products{
 	background: #f1f1f1;
 	width: 100%;
+	height: 100%;
 	text-align: center;
 }
 #products fieldset{
@@ -188,6 +189,13 @@ header #menuNav #notificationKart:hover{
 	display:inline-block;
 	margin-bottom: 15px;
 	border: none;
+	text-align: center;
+}
+#products fieldset .ui-menu{
+	margin-top: 15px;
+	margin-bottom: 0px;
+	width: 150px;
+	border-radius: 10px;
 }
 #categories .ui-accordion-header{
 	margin: 0px;
@@ -277,6 +285,7 @@ header #menuNav #notificationKart:hover{
 #slider #kart{
 	background: #f1f1f1;
 	width: 100%;
+	height: 100%;
 }
 #kart h3{
 	font-size: 2em;
@@ -352,12 +361,6 @@ section.kartProduct div{
 }
 #kart #productsMenu{
 	display: none;
-}
-
-/*Diseño de la pantalla la ubicacion*/
-#slider #location{
-	background: #f1f1f1;
-	width: 100%;
 }
 
 
