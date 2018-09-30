@@ -181,8 +181,11 @@ header #menuNav #notificationKart:hover{
 #slider #products{
 	background: #f1f1f1;
 	width: 100%;
+	text-align: center;
 }
 #products fieldset{
+	position: relative;
+	display:inline-block;
 	margin-bottom: 15px;
 	border: none;
 }

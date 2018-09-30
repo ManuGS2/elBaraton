@@ -35,7 +35,6 @@
 					<ul id="listMenu">
 						<li class="menuItem"><a href="index.html">Home</a></li> 
 						<li onclick="navSection('#products')" class="menuItem"><a href="#">Productos</a></li>
-						<li onclick="navSection('#location')" class="menuItem"><a href="#">Ubicaci&#243;n</a></li>
 						<li onclick="navSection('#kart')" class="menuItem"><a href="#">Carrito</a><p id="notificationMenuNav" style="display:none">0</p></li>
 					</ul> 
 				</div>
@@ -56,6 +55,7 @@
 			<section class="slide" id="products" style="display:none">
 				<h1>El  Baratón</h1>
 				<p>Elige lo que deseas</p>
+
 				<fieldset>
 					<label for="filter">Filtrar por:</label>
 					<select name="filter" id="filter">
@@ -76,12 +76,18 @@
 						<input class="sliderQuantity" type="text" id="cantidad" readonly style="display: none;">
 					</p>
  					<div id="quantitySlide" class="sliderQuantity" style="display: none;"></div>
-
 				</fieldset>
-				<div id="categories"></div>				
-			</section>
 
-			<section class="slide" id="location" style="display:none">
+				<fieldset>
+					<label for="sort">Ordenar por:</label>
+					<select name="sort" id="sort">
+						<option value="available">Disponibilidad</option>
+						<option value="price">Precio</option>
+						<option value="quantity">Cantidad</option>
+					</select>
+				</fieldset>
+
+				<div id="categories"></div>				
 			</section>
 			
 			<section class="slide" id="kart" style="display:none">
@@ -122,18 +128,17 @@
 				Debido a que todo se hizo en un mismo archivo, ocultamos y mostramos las secciones de acuerdo a la que se elija
 			*/
 			function navSection(slide){
-				var sections = new Array(4);
+				var sections = new Array(3);
 				sections[0] = '#home';
 				sections[1] = '#products';
-				sections[2] = '#location';
-				sections[3] = '#kart';
+				sections[2] = '#kart';
 
 				for (var i=0; i<4; i++){
 					$(sections[i]).hide();
 				}
 				$(slide).show();
 				if(slide == "#products"){
-					$("#categories").accordion({heightStyle:"fill",collapsible:true,active:-1,animate:500,icons:{"header":"ui-icon-circle-plus", "activeHeader":"	ui-icon-circle-minus"}});
+					$("#categories").accordion({heightStyle:"content",collapsible:true,active:0,animate:500,icons:{"header":"ui-icon-circle-plus", "activeHeader":"ui-icon-circle-minus"}});
 				}
 				else if(slide == "#kart"){
 					$("#notificationMenuNav").html("0");
@@ -147,7 +152,7 @@
 
 			$.getJSON("/json/products.json", function(data){
 				$.each(data.products, function(key, val){
-					productos.push({value:val.id,label:val.name,lvl:val.sublevel_id,prod:"<section id='"+val.id+"' class='product "+val.sublevel_id+" "+val.available+"'><figure class='productImg'><img src='img/tienda.png' alt=''></figure><h3>Name: "+val.name+"</h3><p class='precioProd'>Price: "+val.price+"</p><p>Available: "+val.available+"</p><p>In stock: "+val.quantity+"</p><p>Add to kart</p><div class='kartImg' onclick=addToKart(['"+val.id+"','"+val.name+"','"+val.quantity+"','"+val.price+"','"+val.available+"'])></div></section>"})
+					productos.push({value:val.id,label:val.name,lvl:val.sublevel_id,price:val.price,quantity:val.quantity,available:val.available,prod:"<section id='"+val.id+"' class='product "+val.sublevel_id+" "+val.available+"'><figure class='productImg'><img src='img/tienda.png' alt=''></figure><h3>Name: "+val.name+"</h3><p class='precioProd'>Price: "+val.price+"</p><p>Available: "+val.available+"</p><p>In stock: "+val.quantity+"</p><p>Add to kart</p><div class='kartImg' onclick=addToKart(['"+val.id+"','"+val.name+"','"+val.quantity+"','"+val.price+"','"+val.available+"'])></div></section>"})
 					labels.push(val.id)
 				});
 			});
@@ -369,11 +374,79 @@
   				}
   			}});
 
+  			function sortByQuantity(){
+  				$(".product").hide();
+  				$(".product").remove();
+  				var arreglo = new Array();
+
+  				/*
+  					Pasamos los elementos a una lista para poder ordenarla de acuerdo a la cantidad
+  					Posteriormente los agregamos a su correspondiente categoría
+  				*/
+  				productos.forEach(function(item,id){
+					arreglo.push([item.prod,item.lvl,item.quantity])
+				});
+
+				arreglo.sort(function(a, b) {
+				    return a[2] - b[2];
+				});
+
+				arreglo.forEach(function(item,id){
+					$(findCategorie(item[1],true)).append(item[0])
+				});
+  			}
+
+  			function sortByAvailability(){
+  				//Eliminamos los elementos que no estan disponibles y los volvemos a agregar al final
+				$(".No").remove();
+  				productos.forEach(function(item,id){
+
+  					if (item.available == "No"){
+  						$(findCategorie(item.lvl,true)).append(item.prod)
+  					}
+				});
+  			}
+
+  			function sortByPrice(){
+  				$(".product").hide();
+  				$(".product").remove();
+  				var arreglo = new Array();
+
+  				/*
+  					Pasamos los elementos a una lista para poder ordenarla de acuerdo al precio
+  					Posteriormente los agregamos a su correspondiente categoría
+  				*/
+  				productos.forEach(function(item,id){
+  					precio= parseInt(item.price.slice(1).split(",").join(""))
+					arreglo.push([item.prod,item.lvl,precio])
+				});
+
+				arreglo.sort(function(a, b) {
+				    return a[2] - b[2];
+				});
+
+				arreglo.forEach(function(item,id){
+					$(findCategorie(item[1],true)).append(item[0])
+				});
+  			}
+
+  			$("#sort").selectmenu({select:function(event,ui){
+  				switch(ui.item.value){
+
+  					case "price":
+  						sortByPrice()
+  						break;
+
+  					case "quantity":
+  						sortByQuantity()
+  						break;
+
+  					case "available":
+  						sortByAvailability()
+  						break;
+  				}
+  			}});
   			
-			
-  			/*
-  			 agregar el ordenamiento y todo eso, filtrado y así
-  			*/
 		</script>
 
     </body>
