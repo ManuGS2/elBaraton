@@ -56,6 +56,28 @@
 			<section class="slide" id="products" style="display:none">
 				<h1>El  Baratón</h1>
 				<p>Elige lo que deseas</p>
+				<fieldset>
+					<label for="filter">Filtrar por:</label>
+					<select name="filter" id="filter">
+						<option value="noFilter" selected="selected">Sin filtro</option>
+						<option value="available">Disponibilidad</option>
+						<option value="price">Precio</option>
+						<option value="quantity">Cantidad</option>
+					</select>
+
+					<p class="sliderPrice" style="display: none;">
+						<label for="rango" class="sliderPrice" style="display: none;">Rango de precio:</label>
+						<input class="sliderPrice" type="text" id="rango" readonly style="display: none;">
+					</p>
+ 					<div id="priceRange" class="sliderPrice" style="display: none;"></div>
+
+ 					<p class="sliderQuantity" style="display: none;">
+						<label for="cantidad" class="sliderQuantity" style="display: none;">Cantidad mínima:</label>
+						<input class="sliderQuantity" type="text" id="cantidad" readonly style="display: none;">
+					</p>
+ 					<div id="quantitySlide" class="sliderQuantity" style="display: none;"></div>
+
+				</fieldset>
 				<div id="categories"></div>				
 			</section>
 
@@ -70,26 +92,7 @@
 					<p>Cantidad</p>
 					<p>Subtotal</p>
 				</div>
-				<div id="carrito">
-					<!--
-						<section class='kartProduct' id='k"+infoProduct[0]+"'>
-							<figure class='kartImg'><img src='img/tienda.png' alt=''></figure>
-							<div>
-								<p class='name'><label class='etiqueta' for='name'>Nombre:&thinsp;</label>"+infoProduct[1]+"</p>
-
-								<p class='price' id='p"+infoProduct[0]+"'><label class='etiqueta' for='price'>Precio:&thinsp;</label>"+[infoProduct[3],infoProduct[4]].join(",")+"</p>
-
-								<p><label class='etiqueta' for='numberItems'>Cantidad: </label>
-								<input class='numberItems' type='text' name='"+infoProduct[0]+"' value='1'>
-								</p>
-
-								<p class='subtotal' id='su"+infoProduct[0]+"'><label class='etiqueta' for='subtotal'>Subtotal:&thinsp;</label>"+[infoProduct[3],infoProduct[4]].join("")+"</p>
-
-								<input onclick=deleteItem('"+infoProduct[0]+"') type='button' value='Eliminar'>
-							</div>
-						</section>
-					-->
-				</div>
+				<div id="carrito"></div>
 			</section>
 		</div>
 
@@ -130,9 +133,12 @@
 				}
 				$(slide).show();
 				if(slide == "#products"){
-					$("#categories").accordion({heightStyle:"content",collapsible:true,active:true,animate:800,icons:{"header":"ui-icon-circle-plus", "activeHeader":"	ui-icon-circle-minus"}});
+					$("#categories").accordion({heightStyle:"fill",collapsible:true,active:-1,animate:500,icons:{"header":"ui-icon-circle-plus", "activeHeader":"	ui-icon-circle-minus"}});
 				}
 				else if(slide == "#kart"){
+					$("#notificationMenuNav").html("0");
+	  				$("#notificationMenuNav").css("display","none");
+	  				$("#home").css("background","#f1f1f1")
 					showKart()
 					$("body").css("background","#f1f1f1")
 				}
@@ -141,7 +147,7 @@
 
 			$.getJSON("/json/products.json", function(data){
 				$.each(data.products, function(key, val){
-					productos.push({value:val.id,label:val.name,lvl:val.sublevel_id,prod:"<section id='"+val.id+"' class='product "+val.sublevel_id+"'><figure class='productImg'><img src='img/tienda.png' alt=''></figure><h3>Name: "+val.name+"</h3><p>Price: "+val.price+"</p><p>Available: "+val.available+"</p><p>In stock: "+val.quantity+"</p><p>Add to kart</p><div class='kartImg' onclick=addToKart(['"+val.id+"','"+val.name+"','"+val.quantity+"','"+val.price+"'])></div></section>"})
+					productos.push({value:val.id,label:val.name,lvl:val.sublevel_id,prod:"<section id='"+val.id+"' class='product "+val.sublevel_id+" "+val.available+"'><figure class='productImg'><img src='img/tienda.png' alt=''></figure><h3>Name: "+val.name+"</h3><p class='precioProd'>Price: "+val.price+"</p><p>Available: "+val.available+"</p><p>In stock: "+val.quantity+"</p><p>Add to kart</p><div class='kartImg' onclick=addToKart(['"+val.id+"','"+val.name+"','"+val.quantity+"','"+val.price+"','"+val.available+"'])></div></section>"})
 					labels.push(val.id)
 				});
 			});
@@ -171,8 +177,9 @@
 						if(item.value == producto){
 							console.log("success")
 							$("#categories").accordion("option","active",findCategorie(item.lvl,false));
-							$("html, body").animate({"scrollTop": $("#"+item.value).position().top+200},250);	
-							$("#"+item.value).effect("bounce","slow")
+							$(findCategorie(item.lvl,true)).animate({"scrollTop":$("#"+item.value).position().top-200},400, function(){
+									$("#"+item.value).effect("bounce","slow");
+							});	
 							return true
 						}
 					});
@@ -222,14 +229,14 @@
   			function addToKart(data){
 				if (typeof(Storage) !== "undefined") {
 					if (localStorage.getItem(data[0]) == null){
-						if (data[1] != "No"){
+						if (data[4] != "No"){
 			  				var numNotification = parseInt($("#notificationKart").html())+1;
 							$("#notificationKart").html(numNotification);
 			  				if (window.matchMedia("(max-width: 767px)").matches){$("#notificationKart").css("display","block")}
 			  				$("#notificationMenuNav").css("display","inline-block")
 	  						$("#notificationMenuNav").html($("#notificationKart").html());
 			  				localStorage.setItem(data[0],data);
-			  				alert("Producto agrado al carrito")
+			  				alert("Producto agregado al carrito")
 
 		  				}else {alert("Producto no disponible")}
 	  				}else {alert("El producto ya está en el carrito")}
@@ -248,12 +255,8 @@
   			*/
   			function showKart(){
   				$("#carrito").children().remove();
-  				$("#notificationMenuNav").html("0");
-  				$("#notificationMenuNav").css("display","none");
-  				$("#home").css("background","#f1f1f1")
   				var infoProduct;
   				Object.keys(localStorage).forEach(function(val, idx){
-  					$("#carrito").append("")
   					infoProduct = localStorage.getItem(val).split(",")
   					$("#carrito").append("<section class='kartProduct' id='k"+infoProduct[0]+"'><figure class='kartImg'><img src='img/tienda.png' alt=''></figure><div><p class='name'><label class='etiqueta' for='name'>Nombre:&thinsp;</label>"+infoProduct[1]+"</p><p class='price' id='p"+infoProduct[0]+"'><label class='etiqueta' for='price'>Precio:&thinsp;</label>"+[infoProduct[3],infoProduct[4]].join(",")+"</p><p><label class='etiqueta' for='numberItems'>Cantidad: </label><input class='numberItems' type='text' name='"+infoProduct[0]+"' value='1'></p><p class='subtotal' id='su"+infoProduct[0]+"'><label class='etiqueta' for='subtotal'>Subtotal:&thinsp;</label>"+[infoProduct[3],infoProduct[4]].join("")+"</p><input class='deleteItem'onclick=deleteItem('"+infoProduct[0]+"') type='button' value='Eliminar'></div></section>");
   				});
@@ -272,7 +275,6 @@
   					var total=0;
 
   					$("#su"+id).html(subtotal)
-  					console.log(subtotal)
 
   					$.each($("p.subtotal"), function(key,val){
   						total += parseInt($(this).html().slice(58))
@@ -282,13 +284,93 @@
   			}
 
   			function payProducts(){
-  				alert("Pagar productos")
+  				alert("Productos pagados")
+  				Object.keys(localStorage).forEach(function(val, idx){
+  					infoProduct = localStorage.getItem(val).split(",")
+  					deleteItem(infoProduct[0])
+  				});
   			}
 
   			function deleteItem(idItem){
   				$("#k"+idItem).toggle("blind")
+  				subtotal = parseInt($("#su"+idItem).html().slice(58))
+  				precioNvo = parseInt($("#amount").html().slice(1))-subtotal;
+  				$("#amount").html("$"+precioNvo);
   				localStorage.removeItem(idItem)
+  				$("#k"+idItem).remove()
   			}
+
+  			function filterByPrice(){
+  				$(".sliderPrice").show();
+  				$("#priceRange").slider({range: true,min:1000,max: 25000,values: [3000,15000],step:100,
+					slide: function(event, ui){
+						$("#rango").val("$"+ui.values[0]+" - $"+ui.values[1]);
+					},stop: function(event,ui){
+						$(".product").show()
+
+						//Buscamos los elementos cuyo precio no se encuentren en el rango seleccionado y los ocultamos
+						$.each($(".product"), function(key, val){
+							aux = $(this)[0].children[2].innerHTML.slice(8).split(",")
+							precio = parseInt([aux[0],aux[1]].join(""))
+							if (precio < ui.values[0] || precio > ui.values[1]){
+								$(this).hide();
+							}
+						})
+					}
+				});
+				$("#rango").val("$"+$("#priceRange").slider("values", 0)+" - $"+$("#priceRange").slider("values", 1));
+  			}
+
+  			function filterByQuantity(){
+  				$(".sliderQuantity").show();
+  				$("#quantitySlide").slider({range:"max",min:1,max:1000,value:100,step:5,
+					slide: function(event, ui){
+						$("#cantidad").val(ui.value);
+					},stop: function(event,ui){
+						$(".product").show()
+
+						//Buscamos los productos de los cuales se tengan menos ejemplares de lo indicado y los ocultamos
+						$.each($(".product"), function(key, val){
+							cantidad = parseInt($(this)[0].children[4].innerHTML.slice(10))
+							if (cantidad < ui.value){
+								$(this).hide()
+							}
+						})
+					}
+				});
+				$("#cantidad").val($("#quantitySlide").slider("value"));
+  			}
+
+  			$("#filter").selectmenu({select:function(event,ui){
+  				switch(ui.item.value){
+
+  					case "noFilter":
+  						$(".product").show()
+  						$(".sliderPrice").hide();
+  						$(".sliderQuantity").hide();
+  						break;
+
+  					case "price":
+  						$(".sliderQuantity").hide();
+  						filterByPrice()
+  						break;
+
+  					case "quantity":
+  						$(".sliderPrice").hide();
+  						filterByQuantity()
+
+  						break;
+
+  					case "available":
+  						$(".sliderPrice").hide();
+  						$(".sliderQuantity").hide();
+  						$(".No").hide();
+  						break;
+  				}
+  			}});
+
+  			
+			
   			/*
   			 agregar el ordenamiento y todo eso, filtrado y así
   			*/
