@@ -12,6 +12,7 @@ Archivos
 
 	* README.txt: Archivo con la descripción e instrucciones para ejecutar el proyecto.	
 	* index.html: El archivo fuente de nuestro proyecto
+
 	* challenge.pdf: Archivo con la descripción del problema
 	
 Carpetas
